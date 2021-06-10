@@ -1,0 +1,25 @@
+{% set dest_url = h.url_for('tif_imageview.convert', image_id=resource.id, _external=True) %}
+<img id=imageid src=""> 
+<input type="hidden" id="ajax_url" value="{{dest_url}}">
+<input type="hidden" id="resource_id" value="{{resource.id}}">
+
+  
+<script type="text/javascript">
+  let request = new XMLHttpRequest();
+  let ajax_url = document.getElementById("ajax_url").value;
+  let formdata = new FormData();
+  formdata.set('resource_id', document.getElementById("resource_id").value);
+
+  request.onreadystatechange = function() {
+      if (request.readyState == XMLHttpRequest.DONE && request.status == 200 ){            
+          document.getElementById("imageid").setAttribute("src", 'data:image/jpg;base64,' + this.responseText);
+      }
+      else {          
+          console.info(this.status)
+      }
+      
+  };
+
+  request.open("POST", ajax_url, true);
+  request.send(formdata);
+</script>
