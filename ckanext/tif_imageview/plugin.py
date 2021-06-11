@@ -18,7 +18,6 @@ def convert():
     rsc = toolkit.get_action('resource_show')({}, {'id': resource_id})
     upload = uploader.get_resource_uploader(rsc)
     filepath = upload.get_path(rsc['id'])
-
     file = open(filepath, "rb").read()
     img = Image.open(io.BytesIO(file))    
     output = io.BytesIO()
@@ -40,10 +39,13 @@ class TifImageviewPlugin(plugins.SingletonPlugin):
         toolkit.add_template_directory(config_, 'theme/templates')
         toolkit.add_public_directory(config_, 'public')
         toolkit.add_resource('fanstatic', 'tif_imageview')
+        self.formats = config_.get(
+            'ckan.preview.image_formats',
+            'tiff tif TIFF').split()
         
         
     def info(self):
-        return {'name': 'tifviewer',
+        return {'name': 'tif_imageview',
             'title': plugins.toolkit._('TIF Viewer'),
             'schema': {'tif_url': [ignore_empty, text_type]},
             'iframed': False,
