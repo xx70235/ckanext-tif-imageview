@@ -27,7 +27,7 @@ To install ckanext-tif-imageview:
 
 2. Clone the source and install it on the virtualenv
 
-        git clone https://github.com//ckanext-tif-imageview.git
+        git clone https://github.com/TIBHannover/ckanext-tif-imageview.git
         cd ckanext-tif-imageview
         pip install -e .
         pip install -r requirements.txt
