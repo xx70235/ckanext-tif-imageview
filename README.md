@@ -21,11 +21,13 @@ Compatibility with core CKAN versions:
 
 To install ckanext-tif-imageview:
 
-1. Activate your CKAN virtual environment, for example:
+1. Activate your CKAN virtual environment and install the extension:
 
-        . /usr/lib/ckan/default/bin/activate
+        > . /usr/lib/ckan/default/bin/activate
+        > pip install ckanext-tif-imageview
 
-2. Clone the source and install it on the virtualenv
+
+2. OR,  Clone the source and install it on the virtualenv
 
         git clone https://github.com/TIBHannover/ckanext-tif-imageview.git
         cd ckanext-tif-imageview
