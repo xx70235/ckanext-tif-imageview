@@ -16,7 +16,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # http://packaging.python.org/en/latest/tutorial.html#version
-    version='1.0.1',
+    version='1.0.3',
 
     description='''A ckan extension for showing TIF images as resource preview''',
     long_description=long_description,
@@ -26,7 +26,7 @@ setup(
     url='https://github.com/TIBHannover/ckanext-tif-imageview',
 
     # Author details
-    author='''Pooya Oladazimi''',
+    author='''Pooya Oladazimi, Technische Informationsbibliothek(TIB)''',
     author_email='''pooya.oladazimi@tib.eu''',
 
     # Choose your license
