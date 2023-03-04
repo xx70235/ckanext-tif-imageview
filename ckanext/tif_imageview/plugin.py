@@ -8,6 +8,11 @@ from PIL import Image
 import io
 import ckan.lib.uploader as uploader
 import base64
+import numpy as np
+import rasterio
+from rasterio.crs import CRS
+from rasterio.warp import transform
+from matplotlib import pyplot
 
 ignore_empty = plugins.toolkit.get_validator('ignore_empty')
 
@@ -18,13 +23,29 @@ def convert():
     rsc = toolkit.get_action('resource_show')({}, {'id': resource_id})
     upload = uploader.get_resource_uploader(rsc)
     filepath = upload.get_path(rsc['id'])
-    file = open(filepath, "rb").read()
-    img = Image.open(io.BytesIO(file))    
-    output = io.BytesIO()
-    img.convert('RGB').save(output, 'JPEG')    
-    output.seek(0)        
-    return base64.b64encode(output.getvalue()).decode()
 
+    outImg = stretchImg(filepath )
+    return outImg
+
+
+
+#百分比拉伸
+def stretchImg(imgPath):
+    outImg= None
+    with rasterio.open(imgPath) as dataset:
+        img=dataset.read()[0]
+        img[img == dataset.nodata] = np.nan  # Convert NoData to NaN
+        vmin, vmax = np.nanpercentile(img, (5,95))  # 5-95% stretch
+        pyplot.imshow(img, cmap='viridis', vmin=vmin, vmax=vmax)
+        with io.BytesIO() as buffer:
+            pyplot.savefig(buffer, format='jpg')
+            buffer.seek(0)
+            # 读取图像数据并将其编码为Base64字符串
+            img_data = buffer.getvalue()
+            img_base64 = base64.b64encode(img_data).decode('utf-8')
+        outImg = img_base64
+    return outImg
+    # outImg.save(resultPath)
 
 class TifImageviewPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
@@ -77,3 +98,7 @@ class TifImageviewPlugin(plugins.SingletonPlugin):
             )
         
         return blueprint
+    
+if __name__=='__main__':
+    filepath='/mnt/temp/soil_moister/SMY2003DECA01.tif'
+    

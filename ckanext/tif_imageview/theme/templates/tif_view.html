@@ -1,5 +1,5 @@
 {% set dest_url = h.url_for('tif_imageview.convert', image_id=resource.id, _external=True) %}
-<img id=imageid src=""> 
+<img id=imageid alt="test-ima-alt" src=""> 
 <input type="hidden" id="ajax_url" value="{{dest_url}}">
 <input type="hidden" id="resource_id" value="{{resource.id}}">
 
