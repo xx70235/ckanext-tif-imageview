@@ -1,5 +1,5 @@
 Pillow==9.4.0
-rasterio
+rasterio==1.3a3
 numpy
 matplotlib
 
