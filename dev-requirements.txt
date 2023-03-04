@@ -1,1 +1,10 @@
 pytest-ckan
+cdo = "*"
+numpy = "*"
+netcdf4 = "*"
+scipy = "*"
+ckanapi = "*"
+python-dateutil = "*"
+rasterio = "*"
+xarray = "*"
+rioxarray = "*"
