@@ -13,6 +13,9 @@ import rasterio
 from rasterio.crs import CRS
 from rasterio.warp import transform
 from matplotlib import pyplot
+from logging import getLogger
+from matplotlib import cm
+log = getLogger(__name__)
 
 ignore_empty = plugins.toolkit.get_validator('ignore_empty')
 
@@ -24,7 +27,7 @@ def convert():
     upload = uploader.get_resource_uploader(rsc)
     filepath = upload.get_path(rsc['id'])
 
-    outImg = stretchImg(filepath )
+    outImg = stretchImg1(filepath)
     return outImg
 
 
@@ -36,6 +39,7 @@ def stretchImg(imgPath):
         img=dataset.read()[0]
         img[img == dataset.nodata] = np.nan  # Convert NoData to NaN
         vmin, vmax = np.nanpercentile(img, (5,95))  # 5-95% stretch
+        log.info('vmin is {}, vmax is {}'.format(vmin,vmax))
         pyplot.imshow(img, cmap='viridis', vmin=vmin, vmax=vmax)
         with io.BytesIO() as buffer:
             pyplot.savefig(buffer, format='jpg')
@@ -46,6 +50,43 @@ def stretchImg(imgPath):
         outImg = img_base64
     return outImg
     # outImg.save(resultPath)
+
+#百分比拉伸
+def stretchImg1(imgPath, lower_percent=20, higher_percent=80):
+    outImg= None
+    log.info('imgPath is {}'.format(imgPath))
+
+    with rasterio.open(imgPath) as dataset:
+        img=dataset.read()[0]
+        img[img == dataset.nodata] = np.nan 
+       
+        out = np.zeros_like(img, dtype=np.uint8)
+        
+  
+        
+        a = 0 
+        b = 255
+        log.info('lower_percent is {}'.format(lower_percent))
+        c = np.nanpercentile(img, lower_percent)
+        log.info('c is {}'.format(str(c)))
+        d = np.nanpercentile(img, higher_percent)
+
+
+        t = a + (img - c) * (b - a) / (d - c)
+        t[t < a] = a
+        t[t > b] = b
+        out= np.nan_to_num(t)
+
+        outImg=Image.fromarray(np.uint8(out))
+        buffer = io.BytesIO()
+        outImg.save(buffer, format='PNG')
+        img_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        # log.info('img_base64 is {}'.format(img_base64))
+
+    outImg = img_base64    
+    return outImg
+
+   
 
 class TifImageviewPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
@@ -101,4 +142,5 @@ class TifImageviewPlugin(plugins.SingletonPlugin):
     
 if __name__=='__main__':
     filepath='/mnt/temp/soil_moister/SMY2003DECA01.tif'
+    # filepath='/var/lib/ckan/resources/b8a/668/f8-8b19-4cfc-88c8-ce7834cbbedc'
     
