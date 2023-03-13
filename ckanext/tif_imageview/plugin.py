@@ -59,24 +59,17 @@ def stretchImg1(imgPath, lower_percent=20, higher_percent=80):
     with rasterio.open(imgPath) as dataset:
         img=dataset.read()[0]
         img[img == dataset.nodata] = np.nan 
-       
         out = np.zeros_like(img, dtype=np.uint8)
-        
-  
-        
         a = 0 
         b = 255
         log.info('lower_percent is {}'.format(lower_percent))
         c = np.nanpercentile(img, lower_percent)
         log.info('c is {}'.format(str(c)))
         d = np.nanpercentile(img, higher_percent)
-
-
         t = a + (img - c) * (b - a) / (d - c)
         t[t < a] = a
         t[t > b] = b
         out= np.nan_to_num(t)
-
         outImg=Image.fromarray(np.uint8(out))
         buffer = io.BytesIO()
         outImg.save(buffer, format='PNG')
