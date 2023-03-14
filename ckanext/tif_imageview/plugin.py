@@ -15,6 +15,8 @@ from rasterio.warp import transform
 from matplotlib import pyplot
 from logging import getLogger
 from matplotlib import cm
+import os
+
 log = getLogger(__name__)
 
 ignore_empty = plugins.toolkit.get_validator('ignore_empty')
@@ -24,11 +26,18 @@ def convert():
     
     resource_id = request.form.get('resource_id')    
     rsc = toolkit.get_action('resource_show')({}, {'id': resource_id})
+    log.info("rsc is {}".format(rsc))
     upload = uploader.get_resource_uploader(rsc)
-    filepath = upload.get_path(rsc['id'])
-
-    outImg = stretchImg1(filepath)
-    return outImg
+    log.info("upload is {}".format(upload))
+    tmp_name = "/tmp/resources_"+rsc['id']+"_"+rsc['url'].split('/')[-1]
+    if os.path.exists(tmp_name):
+        log.info("has tmp image")
+        outImg = stretchImg1(tmp_name)
+        return outImg
+    else:
+        upload.get_object_to_file("resources/"+rsc['id']+"/"+rsc['url'].split('/')[-1],tmp_name)
+        outImg = stretchImg1(tmp_name)
+        return outImg
 
 
 
