@@ -79,7 +79,8 @@ def stretchImg1(imgPath, lower_percent=20, higher_percent=80):
         t[t < a] = a
         t[t > b] = b
         out= np.nan_to_num(t)
-        outImg=Image.fromarray(np.uint8(out))
+        # outImg=Image.fromarray(np.uint8(out))
+        outImg=Image.fromarray(np.uint8(cm.viridis(out)*255))
         buffer = io.BytesIO()
         outImg.save(buffer, format='PNG')
         img_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
