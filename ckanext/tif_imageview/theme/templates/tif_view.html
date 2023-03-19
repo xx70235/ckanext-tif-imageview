@@ -1,5 +1,6 @@
 {% set dest_url = h.url_for('tif_imageview.convert', image_id=resource.id, _external=True) %}
-<img id=imageid alt="test-ima-alt" src=""> 
+<div class="image_type"><img id=imageid alt="test-ima-alt" style="width:90%" src=""> 
+</div>
 <input type="hidden" id="ajax_url" value="{{dest_url}}">
 <input type="hidden" id="resource_id" value="{{resource.id}}">
 
@@ -23,3 +24,12 @@
   request.open("POST", ajax_url, true);
   request.send(formdata);
 </script>
+<style>
+    .image_type {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: auto; /* 设置高度，让图片在垂直方向上居中 */
+  
+}
+</style>

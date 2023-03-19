@@ -32,11 +32,11 @@ def convert():
     tmp_name = "/tmp/resources_"+rsc['id']+"_"+rsc['url'].split('/')[-1]
     if os.path.exists(tmp_name):
         log.info("has tmp image")
-        outImg = stretchImg1(tmp_name)
+        outImg = stretchImg2(tmp_name)
         return outImg
     else:
         upload.get_object_to_file("resources/"+rsc['id']+"/"+rsc['url'].split('/')[-1],tmp_name)
-        outImg = stretchImg1(tmp_name)
+        outImg = stretchImg2(tmp_name)
         return outImg
 
 
@@ -67,12 +67,15 @@ def stretchImg1(imgPath, lower_percent=20, higher_percent=80):
 
     with rasterio.open(imgPath) as dataset:
         img=dataset.read()[0]
+        img = img.astype(float)
         img[img == dataset.nodata] = np.nan 
         out = np.zeros_like(img, dtype=np.uint8)
         a = 0 
         b = 255
         log.info('lower_percent is {}'.format(lower_percent))
         c = np.nanpercentile(img, lower_percent)
+        if c < 0:
+            c=0
         log.info('c is {}'.format(str(c)))
         d = np.nanpercentile(img, higher_percent)
         t = a + (img - c) * (b - a) / (d - c)
@@ -89,6 +92,37 @@ def stretchImg1(imgPath, lower_percent=20, higher_percent=80):
     outImg = img_base64    
     return outImg
 
+#百分比拉伸
+def stretchImg2(imgPath, lower_percent=20, higher_percent=80):
+    outImg= None
+    log.info('imgPath is {}'.format(imgPath))
+
+    with rasterio.open(imgPath) as dataset:
+        img=dataset.read()[0]
+        img = img.astype(float)
+        img[img == dataset.nodata] = np.nan 
+        out = np.zeros_like(img, dtype=np.uint8)
+        a = 0 
+        b = 255
+        log.info('lower_percent is {}'.format(lower_percent))
+        c = np.nanpercentile(img, lower_percent)
+        # if c < 0:
+        #     c=0
+        log.info('c is {}'.format(str(c)))
+        d = np.nanpercentile(img, higher_percent)
+        t = a + (img - c) * (b - a) / (d - c)
+        t[t < a] = a
+        t[t > b] = b
+        out= np.nan_to_num(t)
+        outImg=Image.fromarray(np.uint8(out))
+        # outImg=Image.fromarray(np.uint8(cm.viridis(out)*255))
+        buffer = io.BytesIO()
+        outImg.save(buffer, format='PNG')
+        img_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        # log.info('img_base64 is {}'.format(img_base64))
+
+    outImg = img_base64    
+    return outImg
    
 
 class TifImageviewPlugin(plugins.SingletonPlugin):
@@ -120,9 +154,12 @@ class TifImageviewPlugin(plugins.SingletonPlugin):
         }
     
     def can_view(self, data_dict):
+        # log.debug("show data_dict {}".format(data_dict))
         resource = data_dict['resource']
-        return (resource.get('format', '').lower() in ['tif', 'tiff' ] or
-                resource['url'].split('.')[-1] in ['tif'])
+        can_view = (resource.get('format', '').lower() in ['tif', 'tiff' ] or
+                resource['url'].split('.')[-1] in ['tif']) 
+                # and data_dict['size'] < 25*1024 
+        return can_view
 
     def view_template(self, context, data_dict):
         return 'tif_view.html'
